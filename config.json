@@ -1,0 +1,8 @@
+{
+    "login":
+    {
+	"hostname" : "https://demo.com"
+        "user"     : "demo",
+        "password" : "demo"
+    }
+  }
