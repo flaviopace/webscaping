@@ -3,7 +3,8 @@ import sys
 import json
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 JSON_FILE = 'config.json'
 
@@ -12,7 +13,14 @@ def demo(url):
     driver = webdriver.Chrome()
     driver.get(url)
   
-    username = driver.find_element((By.XPATH, "//*/select[@ng-model='login.username']"))
+    #username = driver.find_element((By.XPATH, "//*/select[@ng-model='login.username']"))
+
+    try:
+        element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "loginPanel")))
+        username = driver.find_element(By.XPATH, "//*[@placeholder='Username']")
+        password = driver.find_element(By.XPATH, "//*[@placeholder='Password']")
+    finally:
+        driver.quit()
   
     print(username)
 
