@@ -28,6 +28,8 @@ def demo(url, user, passwd):
         print('Failed to get Username and Password')
   
 
+    element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "connection-signal")))
+
     driver.close()
 
 
