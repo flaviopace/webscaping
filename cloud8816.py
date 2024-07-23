@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -16,7 +17,7 @@ def demo(url, user, passwd):
     #username = driver.find_element((By.XPATH, "//*/select[@ng-model='login.username']"))
 
     try:
-        element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "loginPanel")))
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "loginPanel")))
         username = driver.find_element(By.XPATH, "//*[@placeholder='Username']")
         username.send_keys(user)
         password = driver.find_element(By.XPATH, "//*[@placeholder='Password']")
@@ -25,10 +26,25 @@ def demo(url, user, passwd):
         login.click()
 
     except:
-        print('Failed to get Username and Password')
+        print('Failed to set Username and Password')
   
 
-    element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "connection-signal")))
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "connection-signal")))
+    
+    # I need to improve this
+    time.sleep(4)
+
+    selectall = driver.find_element(By.XPATH, "//*[@ng-click='toggleCheckAllDevices(true)']")
+    selectall.click()
+
+    statistic = driver.find_element(By.XPATH, "//*[@ng-click='viewFilteredStatistics()']")
+    statistic.click()
+
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "form-group")))
+
+
+    sum = driver.find_element(By.CLASS_NAME, "col-xs-12 col-sm-offset-1 col-sm-10")
+    sum.click()
 
     driver.close()
 
