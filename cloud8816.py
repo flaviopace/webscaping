@@ -41,10 +41,17 @@ def demo(url, user, passwd):
     statistic.click()
 
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "form-group")))
+    
+    # I need to improve this
+    time.sleep(2)
 
-
-    sum = driver.find_element(By.CLASS_NAME, "col-xs-12 col-sm-offset-1 col-sm-10")
+    sum = driver.find_element(By.XPATH, "//*[@options='statisticsService.datePicker.option']")
     sum.click()
+
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "ranges")))
+
+    date = driver.find_element(By.XPATH, "//*[@data-range-key='Ieri']")
+    date.click()
 
     driver.close()
 
