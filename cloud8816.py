@@ -45,13 +45,11 @@ def demo(url, user, passwd):
     # I need to improve this
     time.sleep(2)
 
-    sum = driver.find_element(By.XPATH, "//*[@options='statisticsService.datePicker.option']")
-    sum.click()
+    stat = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[2]/div/ul/li[2]")
+    stat.click()
 
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "ranges")))
-
-    date = driver.find_element(By.XPATH, "//*[@data-range-key='Ieri']")
-    date.click()
+    show = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[3]/div/form/button[1]")
+    show.click()
 
     driver.close()
 
