@@ -66,13 +66,18 @@ def demo(url, user, passwd):
     htmltable = soup.find('table', { 'class' : 'table table-striped' })
     
     headers = []
+    rows = []
     for i, row in enumerate(htmltable.find_all('tr')):
         if i == 1:
             headers = [el.text.strip() for el in row.find_all('th')]
-        else:
+        elif i == 2 or i == 3:
+        #else:
+            print(i)
             print([el.text.strip() for el in row.find_all('td')])
+            rows.append([el.text.strip() for el in row.find_all('td')])
 
     print(headers)
+    print(rows)
 
     driver.close()
 
