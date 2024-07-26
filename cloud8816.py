@@ -7,6 +7,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from bs4 import BeautifulSoup
+
+
 JSON_FILE = 'config.json'
 
 
@@ -48,8 +51,29 @@ def demo(url, user, passwd):
     stat = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[2]/div/ul/li[2]")
     stat.click()
 
+    # I need to improve this
+    time.sleep(1)
+
     show = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[3]/div/form/button[1]")
     show.click()
+
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div[1]/div/table")))
+
+    soup = BeautifulSoup(driver.page_source)
+    htmltable = soup.find('table', { 'class' : 'table table-striped' })
+    
+    headers = []
+    rows = []
+    for i, row in enumerate(htmltable.find_all('tr')):
+        if i == 0:
+            headers = [el.text.strip() for el in row.find_all('th')]
+        else:
+            rows.append([el.text.strip() for el in row.find_all('td')])
+
+    print(headers)
+
+    for row in rows:
+        print(row)
 
     driver.close()
 
