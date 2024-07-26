@@ -59,21 +59,20 @@ def demo(url, user, passwd):
 
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div[1]/div/table")))
 
+    # I need to improve this
+    time.sleep(2)
+
     soup = BeautifulSoup(driver.page_source)
     htmltable = soup.find('table', { 'class' : 'table table-striped' })
     
     headers = []
-    rows = []
     for i, row in enumerate(htmltable.find_all('tr')):
-        if i == 0:
+        if i == 1:
             headers = [el.text.strip() for el in row.find_all('th')]
         else:
-            rows.append([el.text.strip() for el in row.find_all('td')])
+            print([el.text.strip() for el in row.find_all('td')])
 
     print(headers)
-
-    for row in rows:
-        print(row)
 
     driver.close()
 
