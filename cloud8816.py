@@ -99,25 +99,28 @@ class cloud8816:
 
         xpath = "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div[1]/div/table/tbody/tr[1]"
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, xpath)))
-
-        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
         
         if selectopt == 'sum':
+            soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             htmltable = soup.find('table', { 'class' : 'table table-striped' })
-            return self.handlesum(htmltable)
+            return self.handlesum(html=htmltable)
         elif selectopt == 'products':
             # order data
             xpath = "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div/div[1]/table/thead/tr[2]/th[1]"
             order = self.driver.find_element(By.XPATH, xpath)
             order.click()
+            # I need to improve this
+            time.sleep(2)
+            soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             htmltable = soup.find('table', { 'class' : 'table table-bordered table-striped table-hover' })
-            return self.handleproducts(htmltable)
+            htmltable = htmltable.tbody
+            return self.handleproducts(html=htmltable)
 
     @staticmethod
-    def handlesum(self, htmltable):
+    def handlesum(html):
         headers = []
         rows = []
-        for i, row in enumerate(htmltable.find_all('tr')):
+        for i, row in enumerate(html.find_all('tr')):
             if i == 1:
                 headers = [el.text.strip() for el in row.find_all('th')]
             elif i == 2 or i == 3:
@@ -136,18 +139,17 @@ class cloud8816:
     
 
     @staticmethod
-    def handleproducts(self, htmltable):
-
-        headers = []
+    def handleproducts(html):
         rows = []
-        for i, row in enumerate(htmltable.find_all('tr')):
-            if i == 1:
-                headers = [el.text.strip() for el in row.find_all('th')]
-            elif i == 2 or i == 3:
-                #print([el.text.strip() for el in row.find_all('td')])
-                rows.append([el.text.strip() for el in row.find_all('td')])
+        for i, row in enumerate(html.find_all('tr')):
+            #skip first lines
+            itemtoremove = 8
+            items = [el.text.strip() for el in row.find_all('td')]
+            del items[-itemtoremove:]
+            rows.append(items)
 
-        return None
+
+        return rows
     
     def close(self):
         self.driver.close()
