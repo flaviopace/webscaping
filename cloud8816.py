@@ -74,29 +74,31 @@ class cloud8816:
         time.sleep(2)
 
         #select Summary
-        stat = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[2]/div/ul/li[{}]".format(enumoption[selectopt]))
+        xpath = "/html/body/div[1]/div/div/div/div/div[2]/div[2]/div/ul/li[{}]".format(enumoption[selectopt])
+        stat = self.driver.find_element(By.XPATH, xpath)
         stat.click()
 
         # I need to improve this
         time.sleep(1)
 
         #select date
-        date = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[3]/div/form/div/input")
+        xpath = "/html/body/div[1]/div/div/div/div/div[2]/div[3]/div/form/div/input"
+        date = self.driver.find_element(By.XPATH, xpath)
         date.click()
         #today
         #today = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/ul/li[1]")
         #today.click()
         #yestarday
-        today = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/ul/li[{}]".format(enumdate[selectdate]))
+        xpath = "/html/body/div[2]/div[1]/ul/li[{}]".format(enumdate[selectdate])
+        today = self.driver.find_element(By.XPATH, xpath)
         today.click()              
         # View datas
-        show = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[3]/div/form/button[1]")
+        xpath = "/html/body/div[1]/div/div/div/div/div[2]/div[3]/div/form/button[1]"
+        show = self.driver.find_element(By.XPATH, xpath)
         show.click()
 
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div[1]/div/table/tbody/tr[1]")))
-
-        # I need to improve this
-        #time.sleep(2)
+        xpath = "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div[1]/div/table/tbody/tr[1]"
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, xpath)))
 
         soup = BeautifulSoup(self.driver.page_source)
         htmltable = soup.find('table', { 'class' : 'table table-striped' })
