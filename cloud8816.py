@@ -21,6 +21,15 @@ enumdate = {
     "lastmonth" : 6
 }
 
+enumoption = {
+    "sum"         : 2,
+    "allmovement" : 3,
+    "trend"       : 4,
+    "cashflow"    : 5,
+    "product"     : 6,
+    "aliquota"    : 7
+}
+
 class cloud8816:
 
     def __init__(self, host, username, password):
@@ -50,7 +59,7 @@ class cloud8816:
             print('Failed to Login')
   
 
-    def getstat(self, selectdate):
+    def getstat(self, selectopt: enumoption, selectdate: enumdate):
 
         #select All
         selectall = self.driver.find_element(By.XPATH, "//*[@ng-click='toggleCheckAllDevices(true)']")
@@ -65,7 +74,7 @@ class cloud8816:
         time.sleep(2)
 
         #select Summary
-        stat = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[2]/div/ul/li[2]")
+        stat = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[2]/div/ul/li[{}]".format(enumoption[selectopt]))
         stat.click()
 
         # I need to improve this
@@ -126,6 +135,6 @@ if __name__ == '__main__':
     passwd = conf['cloud8816']['pass']
     hostname = conf['cloud8816']['hostname']
     conn = cloud8816(host=hostname, username=user, password=passwd)
-    statsum = conn.getstat('yestarday')
+    statsum = conn.getstat('sum','today')
     print(statsum)
     conn.close()
