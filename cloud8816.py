@@ -85,6 +85,15 @@ class cloud8816:
 
         print(headers)
         print(rows)
+        sumstat = {}
+        for i, header in enumerate(headers):
+            print("{} - {}", i , header)
+            mergeval = []
+            for idx in range(len(rows)):
+                mergeval.append(rows[idx][i])
+            sumstat[header]=mergeval
+        
+        return sumstat
 
     def close(self):
         self.driver.close()
@@ -98,5 +107,5 @@ if __name__ == '__main__':
     passwd = conf['cloud8816']['pass']
     hostname = conf['cloud8816']['hostname']
     conn = cloud8816(host=hostname, username=user, password=passwd)
-    conn.getstat()
+    statsum = conn.getstat()
     conn.close()
