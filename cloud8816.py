@@ -12,6 +12,14 @@ from bs4 import BeautifulSoup
 
 JSON_FILE = 'config.json'
 
+enumdate = {
+    "today"     : 1,
+    "yestarday" : 2,
+    "last7"     : 3,
+    "last30"    : 4,
+    "thismonth" : 5,
+    "lastmonth" : 6
+}
 
 class cloud8816:
 
@@ -42,11 +50,12 @@ class cloud8816:
             print('Failed to Login')
   
 
-    def getstat(self):
+    def getstat(self, selectdate):
 
+        #select All
         selectall = self.driver.find_element(By.XPATH, "//*[@ng-click='toggleCheckAllDevices(true)']")
         selectall.click()
-
+        #view statistics
         statistic = self.driver.find_element(By.XPATH, "//*[@ng-click='viewFilteredStatistics()']")
         statistic.click()
 
@@ -55,12 +64,23 @@ class cloud8816:
         # I need to improve this
         time.sleep(2)
 
+        #select Summary
         stat = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[2]/div/ul/li[2]")
         stat.click()
 
         # I need to improve this
         time.sleep(1)
 
+        #select date
+        date = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[3]/div/form/div/input")
+        date.click()
+        #today
+        #today = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/ul/li[1]")
+        #today.click()
+        #yestarday
+        today = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/ul/li[{}]".format(enumdate[selectdate]))
+        today.click()              
+        # View datas
         show = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[3]/div/form/button[1]")
         show.click()
 
@@ -87,7 +107,6 @@ class cloud8816:
         print(rows)
         sumstat = {}
         for i, header in enumerate(headers):
-            print("{} - {}", i , header)
             mergeval = []
             for idx in range(len(rows)):
                 mergeval.append(rows[idx][i])
@@ -107,5 +126,6 @@ if __name__ == '__main__':
     passwd = conf['cloud8816']['pass']
     hostname = conf['cloud8816']['hostname']
     conn = cloud8816(host=hostname, username=user, password=passwd)
-    statsum = conn.getstat()
+    statsum = conn.getstat('yestarday')
+    print(statsum)
     conn.close()
