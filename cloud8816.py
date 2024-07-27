@@ -13,77 +13,90 @@ from bs4 import BeautifulSoup
 JSON_FILE = 'config.json'
 
 
-def demo(url, user, passwd):
-    driver = webdriver.Chrome()
-    driver.get(url)
+class cloud8816:
+
+    def __init__(self, host, username, password):
+        self.username = username
+        self.password = password
+        self.hostname = host
+    
+        self.driver = webdriver.Chrome()
+
+        self.login()
+    
+    def login(self):
+
+        self.driver.get(self.hostname)
+        try:
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "loginPanel")))
+            username = self.driver.find_element(By.XPATH, "//*[@placeholder='Username']")
+            username.send_keys(self.username)
+            password = self.driver.find_element(By.XPATH, "//*[@placeholder='Password']")
+            password.send_keys(self.password)
+            login = self.driver.find_element(By.XPATH, "//*[@ng-click='executeLogin()']")
+            login.click()
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "connection-signal")))
+            # I need to improve this
+            time.sleep(4)
+        except:
+            print('Failed to Login')
   
-    #username = driver.find_element((By.XPATH, "//*/select[@ng-model='login.username']"))
 
-    try:
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "loginPanel")))
-        username = driver.find_element(By.XPATH, "//*[@placeholder='Username']")
-        username.send_keys(user)
-        password = driver.find_element(By.XPATH, "//*[@placeholder='Password']")
-        password.send_keys(passwd)
-        login = driver.find_element(By.XPATH, "//*[@ng-click='executeLogin()']")
-        login.click()
+    def getstat(self):
 
-    except:
-        print('Failed to set Username and Password')
-  
+        selectall = self.driver.find_element(By.XPATH, "//*[@ng-click='toggleCheckAllDevices(true)']")
+        selectall.click()
 
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "connection-signal")))
-    
-    # I need to improve this
-    time.sleep(4)
+        statistic = self.driver.find_element(By.XPATH, "//*[@ng-click='viewFilteredStatistics()']")
+        statistic.click()
 
-    selectall = driver.find_element(By.XPATH, "//*[@ng-click='toggleCheckAllDevices(true)']")
-    selectall.click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "form-group")))
+        
+        # I need to improve this
+        time.sleep(2)
 
-    statistic = driver.find_element(By.XPATH, "//*[@ng-click='viewFilteredStatistics()']")
-    statistic.click()
+        stat = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[2]/div/ul/li[2]")
+        stat.click()
 
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "form-group")))
-    
-    # I need to improve this
-    time.sleep(2)
+        # I need to improve this
+        time.sleep(1)
 
-    stat = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[2]/div/ul/li[2]")
-    stat.click()
+        show = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[3]/div/form/button[1]")
+        show.click()
 
-    # I need to improve this
-    time.sleep(1)
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div[1]/div/table/tbody/tr[1]")))
 
-    show = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[3]/div/form/button[1]")
-    show.click()
+        # I need to improve this
+        #time.sleep(2)
 
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div[1]/div/table/tbody/tr[1]")))
+        soup = BeautifulSoup(self.driver.page_source)
+        htmltable = soup.find('table', { 'class' : 'table table-striped' })
+        
+        headers = []
+        rows = []
+        for i, row in enumerate(htmltable.find_all('tr')):
+            if i == 1:
+                headers = [el.text.strip() for el in row.find_all('th')]
+            elif i == 2 or i == 3:
+            #else:
+                print(i)
+                print([el.text.strip() for el in row.find_all('td')])
+                rows.append([el.text.strip() for el in row.find_all('td')])
 
-    # I need to improve this
-    #time.sleep(2)
+        print(headers)
+        print(rows)
 
-    soup = BeautifulSoup(driver.page_source)
-    htmltable = soup.find('table', { 'class' : 'table table-striped' })
-    
-    headers = []
-    rows = []
-    for i, row in enumerate(htmltable.find_all('tr')):
-        if i == 1:
-            headers = [el.text.strip() for el in row.find_all('th')]
-        elif i == 2 or i == 3:
-        #else:
-            print(i)
-            print([el.text.strip() for el in row.find_all('td')])
-            rows.append([el.text.strip() for el in row.find_all('td')])
-
-    print(headers)
-    print(rows)
-
-    driver.close()
+    def close(self):
+        self.driver.close()
 
 
 if __name__ == '__main__':
      
     with open(os.path.join(sys.path[0], JSON_FILE), 'r') as in_file:
         conf = json.load(in_file)
-    demo(conf['cloud8816']['hostname'], conf['cloud8816']['user'], conf['cloud8816']['pass'])
+    user = conf['cloud8816']['user']
+    passwd = conf['cloud8816']['pass']
+    hostname = conf['cloud8816']['hostname']
+    conn = cloud8816(host=hostname, username=user, password=passwd)
+    conn.getstat()
+    conn.close()
