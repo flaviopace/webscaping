@@ -26,7 +26,7 @@ enumoption = {
     "allmovement" : 3,
     "trend"       : 4,
     "cashflow"    : 5,
-    "product"     : 6,
+    "products"    : 8,
     "aliquota"    : 7
 }
 
@@ -101,13 +101,20 @@ class cloud8816:
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, xpath)))
 
         soup = BeautifulSoup(self.driver.page_source, 'html.parser')
-        htmltable = soup.find('table', { 'class' : 'table table-striped' })
-
-        if selectopt == 'sum':
-            return self.handlesum(htmltable)
-
-    def handlesum(self, htmltable):
         
+        if selectopt == 'sum':
+            htmltable = soup.find('table', { 'class' : 'table table-striped' })
+            return self.handlesum(htmltable)
+        elif selectopt == 'products':
+            # order data
+            xpath = "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div/div[1]/table/thead/tr[2]/th[1]"
+            order = self.driver.find_element(By.XPATH, xpath)
+            order.click()
+            htmltable = soup.find('table', { 'class' : 'table table-bordered table-striped table-hover' })
+            return self.handleproducts(htmltable)
+
+    @staticmethod
+    def handlesum(self, htmltable):
         headers = []
         rows = []
         for i, row in enumerate(htmltable.find_all('tr')):
@@ -116,7 +123,6 @@ class cloud8816:
             elif i == 2 or i == 3:
                 #print([el.text.strip() for el in row.find_all('td')])
                 rows.append([el.text.strip() for el in row.find_all('td')])
-
 #        print(headers)
 #        print(rows)
         sumstat = {}
@@ -127,7 +133,22 @@ class cloud8816:
             sumstat[header]=mergeval
         
         return sumstat
+    
 
+    @staticmethod
+    def handleproducts(self, htmltable):
+
+        headers = []
+        rows = []
+        for i, row in enumerate(htmltable.find_all('tr')):
+            if i == 1:
+                headers = [el.text.strip() for el in row.find_all('th')]
+            elif i == 2 or i == 3:
+                #print([el.text.strip() for el in row.find_all('td')])
+                rows.append([el.text.strip() for el in row.find_all('td')])
+
+        return None
+    
     def close(self):
         self.driver.close()
 
@@ -140,6 +161,6 @@ if __name__ == '__main__':
     passwd = conf['cloud8816']['pass']
     hostname = conf['cloud8816']['hostname']
     conn = cloud8816(host=hostname, username=user, password=passwd)
-    statsum = conn.getstat('sum','today')
+    statsum = conn.getstat('products','today')
     print(statsum)
     conn.close()
