@@ -57,10 +57,10 @@ def demo(url, user, passwd):
     show = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[3]/div/form/button[1]")
     show.click()
 
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div[1]/div/table")))
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div[1]/div/table/tbody/tr[1]")))
 
     # I need to improve this
-    time.sleep(2)
+    #time.sleep(2)
 
     soup = BeautifulSoup(driver.page_source)
     htmltable = soup.find('table', { 'class' : 'table table-striped' })
