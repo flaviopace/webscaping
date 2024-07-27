@@ -100,8 +100,13 @@ class cloud8816:
         xpath = "/html/body/div[1]/div/div/div/div/div[2]/div[4]/ng-include/div/div[1]/div/table/tbody/tr[1]"
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, xpath)))
 
-        soup = BeautifulSoup(self.driver.page_source)
+        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
         htmltable = soup.find('table', { 'class' : 'table table-striped' })
+
+        if selectopt == 'sum':
+            return self.handlesum(htmltable)
+
+    def handlesum(self, htmltable):
         
         headers = []
         rows = []
@@ -109,13 +114,11 @@ class cloud8816:
             if i == 1:
                 headers = [el.text.strip() for el in row.find_all('th')]
             elif i == 2 or i == 3:
-            #else:
-                print(i)
-                print([el.text.strip() for el in row.find_all('td')])
+                #print([el.text.strip() for el in row.find_all('td')])
                 rows.append([el.text.strip() for el in row.find_all('td')])
 
-        print(headers)
-        print(rows)
+#        print(headers)
+#        print(rows)
         sumstat = {}
         for i, header in enumerate(headers):
             mergeval = []
