@@ -58,10 +58,8 @@ class cloud8816:
         except:
             print('Failed to Login')
   
-
-    def getstat(self, selectopt: enumoption, selectdate: enumdate):
-
-        #select All
+    def gotostat(self):
+         #select All
         selectall = self.driver.find_element(By.XPATH, "//*[@ng-click='toggleCheckAllDevices(true)']")
         selectall.click()
         #view statistics
@@ -72,6 +70,9 @@ class cloud8816:
         
         # I need to improve this
         time.sleep(2)
+
+
+    def getstat(self, selectopt: enumoption, selectdate: enumdate):
 
         #select Summary
         xpath = "/html/body/div[1]/div/div/div/div/div[2]/div[2]/div/ul/li[{}]".format(enumoption[selectopt])
@@ -163,6 +164,9 @@ if __name__ == '__main__':
     passwd = conf['cloud8816']['pass']
     hostname = conf['cloud8816']['hostname']
     conn = cloud8816(host=hostname, username=user, password=passwd)
+    conn.gotostat()
+    statsum = conn.getstat('sum','today')
+    print(statsum)
     statsum = conn.getstat('products','today')
     print(statsum)
     conn.close()
