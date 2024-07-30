@@ -6,6 +6,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 from bs4 import BeautifulSoup
 
@@ -155,14 +157,82 @@ class cloud8816:
     def close(self):
         self.driver.close()
 
+def showprintablesum(statsum):
+    displaydata = {}
+    for key, value in statsum.items():
+        if 'device name' in key.lower():
+            drink = value[0]
+            snack = value[1]
+        elif "sold" in key.lower():
+            drinktotal = value[0]
+            snacktotal = value[1]
+    return "{} : totale {} \n{} : totale {}".format(drink, drinktotal, snack, snacktotal) 
 
-if __name__ == '__main__':
-     
+# Define a few command handlers. These usually take the two arguments update and
+# context.
+# Best practice would be to replace context with an underscore,
+# since context is an unused local variable.
+# This being an example and not having context present confusing beginners,
+# we decided to have it present as context.
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Sends explanation on how to use the bot."""
+    await update.message.reply_text("Hi! Use /set <seconds> to set a timer")
+
+# Define a few command handlers. These usually take the two arguments update and
+# context.
+# Best practice would be to replace context with an underscore,
+# since context is an unused local variable.
+# This being an example and not having context present confusing beginners,
+# we decided to have it present as context.
+async def today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Sends explanation on how to use the bot."""
     with open(os.path.join(sys.path[0], JSON_FILE), 'r') as in_file:
         conf = json.load(in_file)
     user = conf['cloud8816']['user']
     passwd = conf['cloud8816']['pass']
     hostname = conf['cloud8816']['hostname']
+
+    await update.message.reply_text("Sto processando i dati...")
+
+    conn = cloud8816(host=hostname, username=user, password=passwd)
+    conn.gotostat()
+    statsum = conn.getstat('sum','today')
+
+    statsumtxt = showprintablesum(statsum)
+    prodsum = conn.getstat('products','today')
+
+    conn.close()
+    await update.message.reply_text("{}".format(statsumtxt))
+
+# Define a few command handlers. These usually take the two arguments update and
+# context.
+# Best practice would be to replace context with an underscore,
+# since context is an unused local variable.
+# This being an example and not having context present confusing beginners,
+# we decided to have it present as context.
+async def yestarday(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Sends explanation on how to use the bot."""
+    await update.message.reply_text("Hi! Use /set <seconds> to set a timer")
+
+class Cloud8816H24Bot:
+    def __init__(self, tokenid):
+        # Create the Updater and pass it your bot's token.
+        self.app = ApplicationBuilder().token(tokenid).build()
+
+        self.app.add_handler(CommandHandler(["start","help"], start))
+        self.app.add_handler(CommandHandler("oggi", today))
+        self.app.add_handler(CommandHandler("ieri", yestarday))
+
+        # Start the Bot
+        self.app.run_polling()
+
+def testseleniumparser():
+    with open(os.path.join(sys.path[0], JSON_FILE), 'r') as in_file:
+        conf = json.load(in_file)
+    user = conf['cloud8816']['user']
+    passwd = conf['cloud8816']['pass']
+    hostname = conf['cloud8816']['hostname']
+
     conn = cloud8816(host=hostname, username=user, password=passwd)
     conn.gotostat()
     statsum = conn.getstat('sum','today')
@@ -170,3 +240,14 @@ if __name__ == '__main__':
     statsum = conn.getstat('products','today')
     print(statsum)
     conn.close()
+
+
+if __name__ == '__main__':
+     
+    with open(os.path.join(sys.path[0], JSON_FILE), 'r') as in_file:
+         conf = json.load(in_file)
+
+    tokenid = conf['cloud8816_wowh24_config']['token_id']
+    bot = Cloud8816H24Bot(tokenid)
+
+
