@@ -158,7 +158,6 @@ class cloud8816:
         self.driver.close()
 
 def showprintablesum(statsum):
-    displaydata = {}
     for key, value in statsum.items():
         if 'device name' in key.lower():
             drink = value[0]
@@ -167,6 +166,13 @@ def showprintablesum(statsum):
             drinktotal = value[0]
             snacktotal = value[1]
     return "{} : totale {} \n{} : totale {}".format(drink, drinktotal, snack, snacktotal) 
+
+def showprintableprod(prodstat):
+    displaydata = "Prodotto \t- Quantita \t- Totale\n\n"
+    for idx in prodstat:
+        displaydata += "{} \t- {} \t- {}\n".format(idx[0], idx[1], idx[2])
+
+    return displaydata 
 
 # Define a few command handlers. These usually take the two arguments update and
 # context.
@@ -192,17 +198,20 @@ async def today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     passwd = conf['cloud8816']['pass']
     hostname = conf['cloud8816']['hostname']
 
-    await update.message.reply_text("Sto processando i dati...")
-
+    await update.message.reply_text("Attendi qualche secondo, sto collezionando la somma degli incassi ...")
     conn = cloud8816(host=hostname, username=user, password=passwd)
     conn.gotostat()
     statsum = conn.getstat('sum','today')
-
-    statsumtxt = showprintablesum(statsum)
+    txttodisplay = showprintablesum(statsum)
+    await update.message.reply_text("{}".format(txttodisplay))
+    
+    await update.message.reply_text("Attendi qualche secondo, sto collezionando i 10 prodotti piu' venduti ...")
     prodsum = conn.getstat('products','today')
-
+    txttodisplay = showprintableprod(prodsum)
+    await update.message.reply_text("{}".format(txttodisplay))
+    
     conn.close()
-    await update.message.reply_text("{}".format(statsumtxt))
+
 
 # Define a few command handlers. These usually take the two arguments update and
 # context.
@@ -212,7 +221,25 @@ async def today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 # we decided to have it present as context.
 async def yestarday(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends explanation on how to use the bot."""
-    await update.message.reply_text("Hi! Use /set <seconds> to set a timer")
+    with open(os.path.join(sys.path[0], JSON_FILE), 'r') as in_file:
+        conf = json.load(in_file)
+    user = conf['cloud8816']['user']
+    passwd = conf['cloud8816']['pass']
+    hostname = conf['cloud8816']['hostname']
+
+    await update.message.reply_text("Attendi qualche secondo, sto collezionando la somma degli incassi ...")
+    conn = cloud8816(host=hostname, username=user, password=passwd)
+    conn.gotostat()
+    statsum = conn.getstat('sum','yestarday')
+    txttodisplay = showprintablesum(statsum)
+    await update.message.reply_text("{}".format(txttodisplay))
+    
+    await update.message.reply_text("Attendi qualche secondo, sto collezionando i 10 prodotti piu' venduti ...")
+    prodsum = conn.getstat('products','yestarday')
+    txttodisplay = showprintableprod(prodsum)
+    await update.message.reply_text("{}".format(txttodisplay))
+    
+    conn.close()
 
 class Cloud8816H24Bot:
     def __init__(self, tokenid):
