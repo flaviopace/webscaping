@@ -50,15 +50,17 @@ class cloud8816:
             WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "loginPanel")))
             username = self.driver.find_element(By.XPATH, "//*[@placeholder='Username']")
             username.send_keys(self.username)
-            password = self.driver.find_element(By.XPATH, "//*[@placeholder='Password']")
+            # I need to improve this
+            time.sleep(1)
+            password = self.driver.find_element(By.XPATH, "/html/body/div/div/div/div/div/div[2]/div/div/div[2]/div[2]/div/input")
             password.send_keys(self.password)
-            login = self.driver.find_element(By.XPATH, "//*[@ng-click='executeLogin()']")
+            login = self.driver.find_element(By.XPATH, "/html/body/div/div/div/div/div/div[2]/div/div/div[3]/div/button")
             login.click()
             WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "connection-signal")))
             # I need to improve this
             time.sleep(4)
-        except:
-            print('Failed to Login')
+        except Exception as e:
+            print('Failed to Login {}'.format(e))
   
     def gotostat(self):
          #select All
