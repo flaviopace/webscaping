@@ -14,6 +14,13 @@ from bs4 import BeautifulSoup
 
 JSON_FILE = 'config.json'
 
+telegramcmd = {
+    "oggi" : "today" ,
+    "ieri" : "yestarday",
+    "ultimi7gg" : "last7",
+    "ultimi30gg" : "last30",
+}
+
 enumdate = {
     "today"     : 1,
     "yestarday" : 2,
@@ -192,8 +199,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 # since context is an unused local variable.
 # This being an example and not having context present confusing beginners,
 # we decided to have it present as context.
-async def today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def cmdhandler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends explanation on how to use the bot."""
+    input = update.message.text.replace('/','')
+    input = telegramcmd[input]
     with open(os.path.join(sys.path[0], JSON_FILE), 'r') as in_file:
         conf = json.load(in_file)
     user = conf['cloud8816']['user']
@@ -203,41 +212,12 @@ async def today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("Attendi qualche secondo, sto collezionando la somma degli incassi ...")
     conn = cloud8816(host=hostname, username=user, password=passwd)
     conn.gotostat()
-    statsum = conn.getstat('sum','today')
+    statsum = conn.getstat('sum',input)
     txttodisplay = showprintablesum(statsum)
     await update.message.reply_text("{}".format(txttodisplay))
     
     await update.message.reply_text("Attendi qualche secondo, sto collezionando i 10 prodotti piu' venduti ...")
-    prodsum = conn.getstat('products','today')
-    txttodisplay = showprintableprod(prodsum)
-    await update.message.reply_text("{}".format(txttodisplay))
-    
-    conn.close()
-
-
-# Define a few command handlers. These usually take the two arguments update and
-# context.
-# Best practice would be to replace context with an underscore,
-# since context is an unused local variable.
-# This being an example and not having context present confusing beginners,
-# we decided to have it present as context.
-async def yestarday(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Sends explanation on how to use the bot."""
-    with open(os.path.join(sys.path[0], JSON_FILE), 'r') as in_file:
-        conf = json.load(in_file)
-    user = conf['cloud8816']['user']
-    passwd = conf['cloud8816']['pass']
-    hostname = conf['cloud8816']['hostname']
-
-    await update.message.reply_text("Attendi qualche secondo, sto collezionando la somma degli incassi ...")
-    conn = cloud8816(host=hostname, username=user, password=passwd)
-    conn.gotostat()
-    statsum = conn.getstat('sum','yestarday')
-    txttodisplay = showprintablesum(statsum)
-    await update.message.reply_text("{}".format(txttodisplay))
-    
-    await update.message.reply_text("Attendi qualche secondo, sto collezionando i 10 prodotti piu' venduti ...")
-    prodsum = conn.getstat('products','yestarday')
+    prodsum = conn.getstat('products',input)
     txttodisplay = showprintableprod(prodsum)
     await update.message.reply_text("{}".format(txttodisplay))
     
@@ -249,8 +229,10 @@ class Cloud8816H24Bot:
         self.app = ApplicationBuilder().token(tokenid).build()
 
         self.app.add_handler(CommandHandler(["start","help"], start))
-        self.app.add_handler(CommandHandler("oggi", today))
-        self.app.add_handler(CommandHandler("ieri", yestarday))
+        self.app.add_handler(CommandHandler("oggi", cmdhandler))
+        self.app.add_handler(CommandHandler("ieri", cmdhandler))
+        self.app.add_handler(CommandHandler("ultimi7gg", cmdhandler))
+
 
         # Start the Bot
         self.app.run_polling()
