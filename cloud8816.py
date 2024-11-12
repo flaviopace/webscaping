@@ -39,6 +39,8 @@ enumoption = {
     "aliquota"    : 7
 }
 
+ch_id = ''
+
 class cloud8816:
 
     def __init__(self, host, username, password):
@@ -210,17 +212,21 @@ async def cmdhandler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     hostname = conf['cloud8816']['hostname']
 
     await update.message.reply_text("Attendi qualche secondo, sto collezionando la somma degli incassi ...")
+    await context.bot.send_message(chat_id=ch_id, text=input)
     conn = cloud8816(host=hostname, username=user, password=passwd)
     conn.gotostat()
     statsum = conn.getstat('sum',input)
     txttodisplay = showprintablesum(statsum)
     await update.message.reply_text("{}".format(txttodisplay))
+    await context.bot.send_message(chat_id=ch_id, text=txttodisplay)
+
     
     await update.message.reply_text("Attendi qualche secondo, sto collezionando i 10 prodotti piu' venduti ...")
     prodsum = conn.getstat('products',input)
     txttodisplay = showprintableprod(prodsum)
     await update.message.reply_text("{}".format(txttodisplay))
-    
+    await context.bot.send_message(chat_id=ch_id, text=txttodisplay)
+
     conn.close()
 
 class Cloud8816H24Bot:
@@ -259,6 +265,8 @@ if __name__ == '__main__':
          conf = json.load(in_file)
 
     tokenid = conf['cloud8816_wowh24_config']['token_id']
+    #global ch_id
+    ch_id = conf['cloud8816_wowh24_config']['channel_id']
     bot = Cloud8816H24Bot(tokenid)
 
 
