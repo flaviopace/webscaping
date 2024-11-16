@@ -229,6 +229,9 @@ async def cmdhandler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
     conn.close()
 
+async def callback_once(context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(chat_id=ch_id, text="ok")
+
 class Cloud8816H24Bot:
     def __init__(self, tokenid):
         # Create the Updater and pass it your bot's token.
@@ -239,6 +242,8 @@ class Cloud8816H24Bot:
         self.app.add_handler(CommandHandler("ieri", cmdhandler))
         self.app.add_handler(CommandHandler("ultimi7gg", cmdhandler))
 
+        job_queue = self.app.job_queue
+        job_minute = job_queue.run_once(callback_once, when=60)
 
         # Start the Bot
         self.app.run_polling()
