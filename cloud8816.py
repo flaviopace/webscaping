@@ -243,7 +243,7 @@ class Cloud8816H24Bot:
         self.app.add_handler(CommandHandler("ultimi7gg", cmdhandler))
 
         job_queue = self.app.job_queue
-        job_minute = job_queue.run_once(callback_once, when=60)
+        job_minute = job_queue.run_once(callback_once, when=5)
 
         # Start the Bot
         self.app.run_polling()
