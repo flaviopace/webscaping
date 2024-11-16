@@ -7,8 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from telegram import Update
+from telegram import constants as botconst
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-
 from bs4 import BeautifulSoup
 
 
@@ -40,6 +40,15 @@ enumoption = {
 }
 
 ch_id = ''
+
+def getCloud8816Credentials():
+    with open(os.path.join(sys.path[0], JSON_FILE), 'r') as in_file:
+        conf = json.load(in_file)
+    user = conf['cloud8816']['user']
+    passwd = conf['cloud8816']['pass']
+    hostname = conf['cloud8816']['hostname']
+
+    return user, passwd, hostname
 
 class cloud8816:
 
@@ -161,8 +170,6 @@ class cloud8816:
             items = [el.text.strip() for el in row.find_all('td')]
             del items[-itemtoremove:]
             rows.append(items)
-
-
         return rows
     
     def close(self):
@@ -191,25 +198,12 @@ def showprintableprod(prodstat):
 # since context is an unused local variable.
 # This being an example and not having context present confusing beginners,
 # we decided to have it present as context.
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Sends explanation on how to use the bot."""
-    await update.message.reply_text("Hi! Use /set <seconds> to set a timer")
-
-# Define a few command handlers. These usually take the two arguments update and
-# context.
-# Best practice would be to replace context with an underscore,
-# since context is an unused local variable.
-# This being an example and not having context present confusing beginners,
-# we decided to have it present as context.
 async def cmdhandler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends explanation on how to use the bot."""
-    input = update.message.text.replace('/','')
-    input = telegramcmd[input]
-    with open(os.path.join(sys.path[0], JSON_FILE), 'r') as in_file:
-        conf = json.load(in_file)
-    user = conf['cloud8816']['user']
-    passwd = conf['cloud8816']['pass']
-    hostname = conf['cloud8816']['hostname']
+    msginput = update.message.text.replace('/','')
+    input = telegramcmd[msginput]
+    
+    user, passwd, hostname = getCloud8816Credentials()
 
     await update.message.reply_text("Attendi qualche secondo, sto collezionando la somma degli incassi ...")
     await context.bot.send_message(chat_id=ch_id, text=input)
@@ -230,31 +224,44 @@ async def cmdhandler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     conn.close()
 
 async def callback_once(context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=ch_id, text="ok")
+
+    user, passwd, hostname = getCloud8816Credentials()
+
+    keys = list(telegramcmd.keys()) # Rimuovi l'ultima chiave keys_except_last = keys[:-1]
+    keys_except_last = keys[:-1]
+    for key in keys_except_last:
+        await context.bot.send_message(chat_id=ch_id, text="Sto collezionation i dati per: *{}*".format(key), 
+                                       parse_mode=botconst.ParseMode.MARKDOWN_V2)  
+     
+        option = telegramcmd[key]
+        conn = cloud8816(host=hostname, username=user, password=passwd)
+        conn.gotostat()
+        statsum = conn.getstat('sum', option)
+        txttodisplay = showprintablesum(statsum)
+        await context.bot.send_message(chat_id=ch_id, text=txttodisplay)  
+        await context.bot.send_message(chat_id=ch_id, text="Attendi qualche secondo, sto collezionando i 10 prodotti piu' venduti ...")
+        prodsum = conn.getstat('products',option)
+        txttodisplay = showprintableprod(prodsum)
+        await context.bot.send_message(chat_id=ch_id, text=txttodisplay)
 
 class Cloud8816H24Bot:
     def __init__(self, tokenid):
         # Create the Updater and pass it your bot's token.
         self.app = ApplicationBuilder().token(tokenid).build()
 
-        self.app.add_handler(CommandHandler(["start","help"], start))
         self.app.add_handler(CommandHandler("oggi", cmdhandler))
         self.app.add_handler(CommandHandler("ieri", cmdhandler))
         self.app.add_handler(CommandHandler("ultimi7gg", cmdhandler))
 
         job_queue = self.app.job_queue
-        job_minute = job_queue.run_once(callback_once, when=5)
+        job_queue.run_once(callback_once, when=5)
 
         # Start the Bot
         self.app.run_polling()
 
 def testseleniumparser():
-    with open(os.path.join(sys.path[0], JSON_FILE), 'r') as in_file:
-        conf = json.load(in_file)
-    user = conf['cloud8816']['user']
-    passwd = conf['cloud8816']['pass']
-    hostname = conf['cloud8816']['hostname']
 
+    user, passwd, hostname = getCloud8816Credentials()
     conn = cloud8816(host=hostname, username=user, password=passwd)
     conn.gotostat()
     statsum = conn.getstat('sum','today')
