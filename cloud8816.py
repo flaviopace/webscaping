@@ -230,7 +230,7 @@ async def callback_once(context: ContextTypes.DEFAULT_TYPE):
     keys = list(telegramcmd.keys()) # Rimuovi l'ultima chiave keys_except_last = keys[:-1]
     keys_except_last = keys[:-1]
     for key in keys_except_last:
-        await context.bot.send_message(chat_id=ch_id, text="Sto collezionation i dati per: *{}*".format(key), 
+        await context.bot.send_message(chat_id=ch_id, text="Sto collezionando i dati per: *{}*".format(key), 
                                        parse_mode=botconst.ParseMode.MARKDOWN_V2)  
      
         option = telegramcmd[key]
@@ -243,6 +243,7 @@ async def callback_once(context: ContextTypes.DEFAULT_TYPE):
         prodsum = conn.getstat('products',option)
         txttodisplay = showprintableprod(prodsum)
         await context.bot.send_message(chat_id=ch_id, text=txttodisplay)
+        await context.bot.send_message(chat_id=ch_id, text="___________________")  
 
 class Cloud8816H24Bot:
     def __init__(self, tokenid):
