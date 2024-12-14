@@ -10,6 +10,7 @@ from telegram import Update
 from telegram import constants as botconst
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from bs4 import BeautifulSoup
+import datetime
 
 
 JSON_FILE = 'config.json'
@@ -175,6 +176,11 @@ class cloud8816:
     def close(self):
         self.driver.close()
 
+def end_of_month(dt):
+    todays_month = dt.month
+    tomorrows_month = (dt + datetime.timedelta(days=1)).month
+    return tomorrows_month != todays_month
+
 def showprintablesum(statsum):
     for key, value in statsum.items():
         if 'device name' in key.lower():
@@ -262,6 +268,14 @@ class Cloud8816H24Bot:
 
 def testseleniumparser():
 
+    now = datetime.datetime.now()
+    weekno = now.weekday()
+
+    if end_of_month(now):
+        print("is last")
+    if weekno == 6:
+        print("is sunday")
+        
     user, passwd, hostname = getCloud8816Credentials()
     conn = cloud8816(host=hostname, username=user, password=passwd)
     conn.gotostat()
