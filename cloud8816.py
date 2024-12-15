@@ -233,9 +233,21 @@ async def callback_once(context: ContextTypes.DEFAULT_TYPE):
 
     user, passwd, hostname = getCloud8816Credentials()
 
-    keys = list(telegramcmd.keys()) # Rimuovi l'ultima chiave keys_except_last = keys[:-1]
-    keys_except_last = keys[:-1]
-    for key in keys_except_last:
+    query_list = []
+    keys = list(telegramcmd.keys())
+    query_list.append(keys[0])    # only today
+
+    now = datetime.datetime.now()
+    weekno = now.weekday()
+
+    if end_of_month(now):
+        print("is last day of the month")
+        query_list.append(keys[3])  # 30 latest day 
+    if weekno == 6:
+        print("is sunday")
+        query_list.append(keys[2])  # 7 latest day
+     
+    for key in query_list:
         await context.bot.send_message(chat_id=ch_id, text="Sto collezionando i dati per: *{}*".format(key), 
                                        parse_mode=botconst.ParseMode.MARKDOWN_V2)  
      
